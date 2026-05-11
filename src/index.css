@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Muskoka palette — birch cream background, pine forest primary */
+    --background: 40 22% 97%;
+    --foreground: 85 25% 11%;
+
+    --card: 40 15% 99%;
+    --card-foreground: 85 25% 11%;
+
+    --popover: 40 15% 99%;
+    --popover-foreground: 85 25% 11%;
+
+    /* Muskoka pine green #3A6B2A ≈ HSL 108 44% 29% */
+    --primary: 108 44% 29%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 90 18% 91%;
+    --secondary-foreground: 85 25% 11%;
+
+    --muted: 90 18% 91%;
+    --muted-foreground: 100 12% 36%;
+
+    /* Warm birch-gold accent */
+    --accent: 40 70% 92%;
+    --accent-foreground: 38 65% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 90 15% 84%;
+    --input: 90 15% 84%;
+    --ring: 108 44% 29%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 100 25% 7%;
+    --foreground: 90 18% 93%;
+    --card: 100 25% 10%;
+    --card-foreground: 90 18% 93%;
+    --popover: 100 25% 10%;
+    --popover-foreground: 90 18% 93%;
+    --primary: 108 38% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 100 18% 18%;
+    --secondary-foreground: 90 18% 93%;
+    --muted: 100 18% 18%;
+    --muted-foreground: 100 12% 60%;
+    --accent: 38 35% 20%;
+    --accent-foreground: 38 70% 80%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 100 18% 18%;
+    --input: 100 18% 18%;
+    --ring: 108 38% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Barlow Condensed", sans-serif;
+    @apply tracking-tight;
+  }
+}
