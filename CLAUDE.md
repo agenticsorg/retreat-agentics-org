@@ -65,7 +65,7 @@ All deployed to `https://us-central1-agenticsorg.cloudfunctions.net/`
 
 Functions source: `crm/dashboard/functions/src/api/retreat.ts` in the monorepo.
 
-**Tier names** (must match exactly): `single` | `buddy` | `suite`
+**Tier names** (must match exactly): `solo` | `buddy` | `family`
 
 ## Deployment
 

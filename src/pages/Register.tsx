@@ -28,7 +28,7 @@ type InterestForm = z.infer<typeof interestSchema>;
 // ── Full Registration ───────────────────────────────────────────────────────
 const registrationSchema = z
   .object({
-    tier: z.enum(["single", "buddy", "suite"], { required_error: "Please select a tier" }),
+    tier: z.enum(["solo", "buddy", "family"], { required_error: "Please select a tier" }),
     name: z.string().min(2, "Please enter your full name"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().optional(),
@@ -51,19 +51,19 @@ const registrationSchema = z
 type RegistrationForm = z.infer<typeof registrationSchema>;
 
 const TIER_INFO: Record<string, { label: string; price: string; note: string }> = {
-  single: {
-    label: "Single Room — Private 1-bedroom",
-    price: "$1,995 USD / person",
-    note: "All meals + activities included. Limited availability.",
+  solo: {
+    label: "Solo — Private 1-bedroom suite",
+    price: "$1,500 USD / person (early bird — rises to $2,000 on June 1)",
+    note: "All meals + activities included. Only 10 available.",
   },
   buddy: {
-    label: "Buddy Room — Shared 2-bedroom (per person)",
-    price: "$1,595 USD / person",
+    label: "Buddy — Shared 2-bedroom suite (per person)",
+    price: "$1,200 USD / person (early bird — rises to $1,700 on June 1)",
     note: "Both attendees must register. Enter your partner's email below.",
   },
-  suite: {
-    label: "Suite — Exclusive 2-bedroom",
-    price: "$2,249 USD / suite",
+  family: {
+    label: "Family — Exclusive 2-bedroom suite",
+    price: "$1,800 USD first person + $450 / additional person (early bird)",
     note: "All meals + activities included. Sep 2026.",
   },
 };
@@ -123,6 +123,7 @@ function FullRegistrationForm() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegistrationForm>({ resolver: zodResolver(registrationSchema) });
 
@@ -146,6 +147,8 @@ function FullRegistrationForm() {
   }
 
   const tierInfo = tier ? TIER_INFO[tier] : null;
+  const additionalPersons = Number(watch("additionalPersons")) || 0;
+  const familyTotal = 1800 + additionalPersons * 450;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg">
@@ -159,9 +162,9 @@ function FullRegistrationForm() {
             <SelectValue placeholder="Select a tier…" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
-            <SelectItem value="single">Single Room — $1,995 / person</SelectItem>
-            <SelectItem value="buddy">Buddy Room — $1,595 / person (shared 2-bedroom)</SelectItem>
-            <SelectItem value="suite">Suite — $2,249 (exclusive 2-bedroom)</SelectItem>
+            <SelectItem value="solo">Solo — $1,500 / person (early bird, private 1-bedroom)</SelectItem>
+            <SelectItem value="buddy">Buddy — $1,200 / person (early bird, shared 2-bedroom)</SelectItem>
+            <SelectItem value="family">Family — $1,800 + $450/person (early bird, exclusive 2-bedroom)</SelectItem>
           </SelectContent>
         </Select>
         {errors.tier && <p className="text-xs text-destructive">{errors.tier.message}</p>}
@@ -218,14 +221,14 @@ function FullRegistrationForm() {
         </div>
       )}
 
-      {/* Additional persons — Suite tier only */}
-      {tier === "suite" && (
+      {/* Additional persons — Family tier only */}
+      {tier === "family" && (
         <div className="space-y-1 rounded-lg border border-primary/20 bg-primary/5 p-4">
           <Label htmlFor="reg-additional">
             Additional attendees sharing your suite
           </Label>
           <p className="text-xs text-muted-foreground mb-2">
-            Each additional person is $450 early bird (or $450 after June 1).
+            $450 per additional person. Leave at 0 if registering alone.
           </p>
           <Input
             id="reg-additional"
@@ -235,6 +238,10 @@ function FullRegistrationForm() {
             placeholder="0"
             {...register("additionalPersons")}
           />
+          <p className="text-xs font-semibold text-primary mt-2">
+            Total: ${familyTotal.toLocaleString()} USD early bird
+            {additionalPersons > 0 && ` (${1 + additionalPersons} people)`}
+          </p>
         </div>
       )}
 
@@ -307,7 +314,7 @@ export default function Register() {
           <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-semibold text-primary">Limited spots available — register now to secure your place</p>
-            <p className="text-muted-foreground">Single rooms, buddy rooms, and suites available. Sep 18–21, 2026.</p>
+            <p className="text-muted-foreground">Solo, Buddy, and Family suites available. Sep 18–21, 2026.</p>
           </div>
         </div>
 
