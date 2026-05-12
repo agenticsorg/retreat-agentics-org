@@ -59,7 +59,7 @@ export default function Success() {
             <div>
               <p className="font-semibold text-sm mb-1">Add to your calendar</p>
               <p className="text-sm text-muted-foreground">
-                September 4–6, 2026 · RockyCrest Resort, Ontario, Canada. Calendar invites will be
+                September 18–21, 2026 · Rocky Crest Golf Resort, MacTier, Muskoka, Ontario. Calendar invites will be
                 sent closer to the event.
               </p>
             </div>

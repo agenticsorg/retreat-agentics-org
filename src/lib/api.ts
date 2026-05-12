@@ -23,10 +23,12 @@ export interface InterestPayload {
 }
 
 export interface RegisterPayload {
-  tier: "single" | "buddy" | "suite";
+  tier: "solo" | "buddy" | "family";
   email: string;
   name: string;
+  phone?: string;
   partner?: string;
+  additionalPersons?: number;
   dietaryReqs?: string;
   emergencyContact?: string;
 }
