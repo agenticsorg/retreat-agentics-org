@@ -10,10 +10,10 @@ curl -s -X PATCH \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -H "x-goog-user-project: agenticsorg" \
-  "https://firestore.googleapis.com/v1/projects/agenticsorg/databases/(default)/documents/retreat_config/inventory?updateMask.fieldPaths=singleRemaining&updateMask.fieldPaths=buddyRemaining&updateMask.fieldPaths=suiteRemaining" \
+  "https://firestore.googleapis.com/v1/projects/agenticsorg/databases/(default)/documents/retreat_config/inventory?updateMask.fieldPaths=soloRemaining&updateMask.fieldPaths=buddyRemaining&updateMask.fieldPaths=suiteRemaining" \
   -d '{
     "fields": {
-      "singleRemaining": {"integerValue": "10"},
+      "soloRemaining": {"integerValue": "10"},
       "buddyRemaining":  {"integerValue": "50"},
       "suiteRemaining":  {"integerValue": "20"}
     }
@@ -24,7 +24,7 @@ if 'error' in d:
     print('ERROR:', d['error'])
     sys.exit(1)
 fields = d.get('fields', {})
-print('singleRemaining:', fields.get('singleRemaining', {}).get('integerValue'))
+print('soloRemaining:', fields.get('soloRemaining', {}).get('integerValue'))
 print('buddyRemaining: ', fields.get('buddyRemaining',  {}).get('integerValue'))
 print('suiteRemaining: ', fields.get('suiteRemaining',  {}).get('integerValue'))
 print('Done.')

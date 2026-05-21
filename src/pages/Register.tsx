@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/components/ui/select";
-import { submitInterest, createRegistrationSession } from "@/lib/api";
+import { submitInterest, createRegistrationSession, ApiError } from "@/lib/api";
 
 // ── Early Interest ──────────────────────────────────────────────────────────
 const interestSchema = z.object({
@@ -136,8 +136,17 @@ function FullRegistrationForm() {
       };
       const { url } = await createRegistrationSession(payload as Parameters<typeof createRegistrationSession>[0]);
       window.location.href = url;
-    } catch {
-      toast.error("Registration failed. Please try again or contact retreat@agentics.org.");
+    } catch (err) {
+      let message = "Registration failed. Please try again or contact retreat@agentics.org.";
+      if (err instanceof ApiError) {
+        try {
+          const parsed = JSON.parse(err.message);
+          if (parsed?.error && typeof parsed.error === "string") message = parsed.error;
+        } catch {
+          if (err.message) message = err.message;
+        }
+      }
+      toast.error(message);
     }
   }
 
