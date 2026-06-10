@@ -3,3 +3,8 @@ dist/
 .env
 .env.local
 *.local
+
+# Claude Code / tooling
+.claude/
+.claude-flow/
+.mcp.json
