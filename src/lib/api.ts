@@ -39,6 +39,19 @@ export const submitInterest = (data: InterestPayload) =>
 export const createRegistrationSession = (data: RegisterPayload) =>
   post<{ url: string }>("/retreatCreateCheckoutSession", data);
 
+export interface RetreatInventory {
+  soloRemaining: number;
+  buddyRemaining: number;
+  familyRemaining: number;
+  sponsorAvailable: boolean;
+}
+
+export const getInventory = async (): Promise<RetreatInventory> => {
+  const res = await fetch(`${BASE}/retreatInventory`);
+  if (!res.ok) throw new ApiError(res.status, await res.text());
+  return res.json();
+};
+
 export interface ContactPayload {
   name: string;
   email: string;

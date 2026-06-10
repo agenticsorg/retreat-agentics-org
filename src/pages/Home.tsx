@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Laptop, Waves, Mic, MapPin, Calendar, CheckCircle, TreePine, Anchor, Zap, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -9,7 +9,7 @@ import SEO from "@/components/SEO";
 import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/input";
 import { Label } from "@shared/components/ui/label";
-import { submitInterest } from "@/lib/api";
+import { submitInterest, getInventory } from "@/lib/api";
 
 const interestSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -119,6 +119,15 @@ const INCLUDED_MEALS = [
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false);
+  // Optimistic default: only flip to sold-out on an explicit false from the API,
+  // so a failed fetch never falsely blocks sponsorships (backend still guards).
+  const [sponsorAvailable, setSponsorAvailable] = useState(true);
+
+  useEffect(() => {
+    getInventory()
+      .then((inv) => setSponsorAvailable(inv.sponsorAvailable))
+      .catch(() => {/* keep optimistic default */});
+  }, []);
   const {
     register,
     handleSubmit,
@@ -356,9 +365,15 @@ export default function Home() {
       {/* Sponsor / scholarship tier */}
       <section className="py-16 bg-background">
         <div className="container max-w-5xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/5 p-8 md:p-10">
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
-              <Mic className="h-3.5 w-3.5" /> Sponsor a Scholarship
+          <div className={`relative overflow-hidden rounded-2xl border p-8 md:p-10 ${
+            sponsorAvailable ? "border-primary/30 bg-primary/5" : "border-border bg-muted/40"
+          }`}>
+            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-0.5 text-xs font-semibold ${
+              sponsorAvailable
+                ? "bg-primary text-primary-foreground"
+                : "bg-destructive text-destructive-foreground"
+            }`}>
+              <Mic className="h-3.5 w-3.5" /> {sponsorAvailable ? "Sponsor a Scholarship" : "Sponsorships — Sold Out"}
             </span>
             <div className="mt-4 flex flex-col lg:flex-row lg:items-center gap-8">
               <div className="flex-1">
@@ -382,10 +397,24 @@ export default function Home() {
                 </ul>
               </div>
               <div className="lg:text-right shrink-0">
-                <p className="text-4xl font-heading font-bold">$6,000 <span className="text-sm font-normal text-muted-foreground">USD</span></p>
-                <Button asChild className="mt-4">
-                  <Link to="/register">Become a sponsor <ArrowRight className="h-4 w-4" /></Link>
-                </Button>
+                {sponsorAvailable ? (
+                  <>
+                    <p className="text-4xl font-heading font-bold">$6,000 <span className="text-sm font-normal text-muted-foreground">USD</span></p>
+                    <Button asChild className="mt-4">
+                      <Link to="/register">Become a sponsor <ArrowRight className="h-4 w-4" /></Link>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-4xl font-heading font-bold text-muted-foreground line-through">$6,000</p>
+                    <span className="mt-4 inline-flex items-center justify-center rounded-md bg-destructive/15 px-5 py-2 text-sm font-bold uppercase tracking-wide text-destructive">
+                      Sold Out
+                    </span>
+                    <p className="mt-2 text-xs text-muted-foreground max-w-[14rem] lg:ml-auto">
+                      The rooms this package needs are fully booked.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
