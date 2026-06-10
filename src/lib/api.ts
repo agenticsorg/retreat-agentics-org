@@ -23,7 +23,7 @@ export interface InterestPayload {
 }
 
 export interface RegisterPayload {
-  tier: "solo" | "buddy" | "family";
+  tier: "solo" | "buddy" | "family" | "meals";
   email: string;
   name: string;
   phone?: string;

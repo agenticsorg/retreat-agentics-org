@@ -95,30 +95,38 @@ const faqs: FaqItem[] = [
           <li>Summit swag</li>
         </ul>
         <p className="mt-2 text-xs font-medium">Not included: golf course fees (optional add-on) and alcohol (cash bar available).</p>
+        <p className="mt-2 text-xs font-medium">The meals-only day pass ($450) includes everything above except overnight accommodation.</p>
       </>
     ),
   },
   {
-    question: "What are the pricing tiers and early bird rates?",
+    question: "What are the pricing tiers?",
     answer: (
       <>
-        <p>Early bird pricing is available until <strong>May 31, 2026</strong>. Prices rise $500 USD on June 1.</p>
+        <p>All prices are in USD. Only a few rooms remain — first come, first served.</p>
         <ul className="mt-2 space-y-2 list-disc list-inside">
           <li>
-            <strong>Solo</strong> — Private 1-bedroom suite: <strong>$1,500 USD</strong> early bird ($2,000 after May 31).
-            Only 10 single suites available — first come, first served.
+            <strong>Solo</strong> — Private 1-bedroom suite: <strong>$2,000</strong> per person.
           </li>
           <li>
-            <strong>Buddy</strong> — Shared 2-bedroom suite (register as a pair): <strong>$1,200 USD</strong> per person
-            early bird ($1,700 after May 31).
+            <strong>Buddy</strong> — Shared 2-bedroom suite (register as a pair): <strong>$1,700</strong> per person.
           </li>
           <li>
-            <strong>Family</strong> — Exclusive 2-bedroom suite: <strong>$1,800 USD</strong> first person
-            + <strong>$450 USD</strong> per additional attendee ($2,300 first person after May 31).
+            <strong>Family</strong> — Exclusive 2-bedroom suite: <strong>$2,300</strong> first person
+            + <strong>$450</strong> per additional attendee.
+          </li>
+          <li>
+            <strong>Meals &amp; Sessions</strong> — Day pass: <strong>$450</strong> per person. All meals
+            and sessions with <em>no overnight accommodation</em> — ideal for local or commuting guests.
           </li>
         </ul>
       </>
     ),
+  },
+  {
+    question: "Are there member discounts or promo codes?",
+    answer:
+      "Yes — active Agentics members receive $500 off a suite tier (Solo, Buddy, or Family). Enter your member code in the promo-code field on the secure Stripe checkout page and the discount is applied automatically. The discount does not apply to the meals-only day pass. Not a member yet? Email retreat@agentics.org.",
   },
   {
     question: "Can I attend at the Buddy rate without a partner?",
@@ -217,7 +225,7 @@ export default function FAQ() {
     <>
       <SEO
         title="FAQ"
-        description="Frequently asked questions about the Agentics Foundation Fall Retreat 2026 — pricing, early bird rates, rooms, hackathon, boat tour, travel, and dietary needs."
+        description="Frequently asked questions about the Agentics Foundation Fall Retreat 2026 — pricing, member discounts, rooms, hackathon, boat tour, travel, and dietary needs."
         path="/faq"
       />
       <div className="container py-16 max-w-2xl mx-auto">
@@ -247,7 +255,7 @@ export default function FAQ() {
         <div className="mt-8 rounded-xl bg-primary/5 border border-primary/20 p-6 text-center">
           <p className="font-semibold mb-1">Ready to join us on Lake Joseph?</p>
           <p className="text-sm text-muted-foreground mb-4">
-            Early bird pricing ends May 31, 2026. Only 10 solo suites available.
+            Only a few rooms left — secure your suite before they're gone.
           </p>
           <Link
             to="/register"

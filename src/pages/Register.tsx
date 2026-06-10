@@ -28,7 +28,7 @@ type InterestForm = z.infer<typeof interestSchema>;
 // ── Full Registration ───────────────────────────────────────────────────────
 const registrationSchema = z
   .object({
-    tier: z.enum(["solo", "buddy", "family"], { required_error: "Please select a tier" }),
+    tier: z.enum(["solo", "buddy", "family", "meals"], { required_error: "Please select a tier" }),
     name: z.string().min(2, "Please enter your full name"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().optional(),
@@ -53,18 +53,23 @@ type RegistrationForm = z.infer<typeof registrationSchema>;
 const TIER_INFO: Record<string, { label: string; price: string; note: string }> = {
   solo: {
     label: "Solo — Private 1-bedroom suite",
-    price: "$1,500 USD / person (early bird — rises to $2,000 on June 1)",
-    note: "All meals + activities included. Only 10 available.",
+    price: "$2,000 USD / person",
+    note: "All meals + activities included. Private 1-bedroom suite — only a few rooms left.",
   },
   buddy: {
     label: "Buddy — Shared 2-bedroom suite (per person)",
-    price: "$1,200 USD / person (early bird — rises to $1,700 on June 1)",
-    note: "Both attendees must register. Enter your partner's email below.",
+    price: "$1,700 USD / person",
+    note: "Both attendees must register. Enter your partner's email below. Only a few rooms left.",
   },
   family: {
     label: "Family — Exclusive 2-bedroom suite",
-    price: "$1,800 USD first person + $450 / additional person (early bird)",
-    note: "All meals + activities included. Sep 2026.",
+    price: "$2,300 USD first person + $450 / additional person",
+    note: "All meals + activities included. Only a few rooms left.",
+  },
+  meals: {
+    label: "Meals & Sessions — day pass (no room)",
+    price: "$450 USD / person",
+    note: "All meals, workshops, hackathon & boat tour. Overnight accommodation not included — ideal for local or commuting guests.",
   },
 };
 
@@ -148,7 +153,7 @@ function FullRegistrationForm() {
 
   const tierInfo = tier ? TIER_INFO[tier] : null;
   const additionalPersons = Number(watch("additionalPersons")) || 0;
-  const familyTotal = 1800 + additionalPersons * 450;
+  const familyTotal = 2300 + additionalPersons * 450;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg">
@@ -162,9 +167,10 @@ function FullRegistrationForm() {
             <SelectValue placeholder="Select a tier…" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
-            <SelectItem value="solo">Solo — $1,500 / person (early bird, private 1-bedroom)</SelectItem>
-            <SelectItem value="buddy">Buddy — $1,200 / person (early bird, shared 2-bedroom)</SelectItem>
-            <SelectItem value="family">Family — $1,800 + $450/person (early bird, exclusive 2-bedroom)</SelectItem>
+            <SelectItem value="solo">Solo — $2,000 / person (private 1-bedroom)</SelectItem>
+            <SelectItem value="buddy">Buddy — $1,700 / person (shared 2-bedroom)</SelectItem>
+            <SelectItem value="family">Family — $2,300 + $450/person (exclusive 2-bedroom)</SelectItem>
+            <SelectItem value="meals">Meals & Sessions — $450 / person (day pass, no room)</SelectItem>
           </SelectContent>
         </Select>
         {errors.tier && <p className="text-xs text-destructive">{errors.tier.message}</p>}
@@ -239,7 +245,7 @@ function FullRegistrationForm() {
             {...register("additionalPersons")}
           />
           <p className="text-xs font-semibold text-primary mt-2">
-            Total: ${familyTotal.toLocaleString()} USD early bird
+            Total: ${familyTotal.toLocaleString()} USD
             {additionalPersons > 0 && ` (${1 + additionalPersons} people)`}
           </p>
         </div>
@@ -279,9 +285,14 @@ function FullRegistrationForm() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Clicking "Continue to payment" redirects to secure Stripe checkout. All-inclusive pricing
-        covers resort accommodations (3 nights), all meals, workshops, hackathon, Saturday boat
-        tour, and resort amenities. Golf and alcohol not included.
+        Clicking "Continue to payment" redirects to secure Stripe checkout. Suite tiers are
+        all-inclusive — resort accommodations (3 nights), all meals, workshops, hackathon, Saturday
+        boat tour, and resort amenities. The meals-only day pass excludes overnight accommodation.
+        Golf and alcohol not included.
+      </p>
+      <p className="text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">Active Agentics member?</span> Enter your
+        member code at checkout for $500 off a suite tier.
       </p>
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
@@ -309,12 +320,12 @@ export default function Register() {
           </p>
         </div>
 
-        {/* Early bird banner */}
+        {/* Availability banner */}
         <div className="mb-8 rounded-lg bg-primary/8 border border-primary/25 p-4 flex items-start gap-3">
           <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-semibold text-primary">Limited spots available — register now to secure your place</p>
-            <p className="text-muted-foreground">Solo, Buddy, and Family suites available. Sep 18–21, 2026.</p>
+            <p className="font-semibold text-primary">Only a few rooms left — register now to secure your place</p>
+            <p className="text-muted-foreground">Solo, Buddy, and Family suites, plus a meals-only day pass. Sep 18–21, 2026.</p>
           </div>
         </div>
 
