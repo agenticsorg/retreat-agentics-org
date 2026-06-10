@@ -106,18 +106,23 @@ const faqs: FaqItem[] = [
         <p>All prices are in USD. Only a few rooms remain — first come, first served.</p>
         <ul className="mt-2 space-y-2 list-disc list-inside">
           <li>
-            <strong>Solo</strong> — Private 1-bedroom suite: <strong>$2,000</strong> per person.
+            <strong>Solo</strong> — Private 1-bedroom suite: <strong>$2,000</strong> per person. Only 2 rooms left.
           </li>
           <li>
-            <strong>Buddy</strong> — Shared 2-bedroom suite (register as a pair): <strong>$1,700</strong> per person.
+            <strong>Buddy</strong> — Shared 2-bedroom suite (register as a pair): <strong>$1,700</strong> per person. Only 10 rooms left.
           </li>
           <li>
             <strong>Family</strong> — Exclusive 2-bedroom suite: <strong>$2,300</strong> first person
-            + <strong>$450</strong> per additional attendee.
+            + <strong>$450</strong> per additional attendee. Only 6 rooms left.
           </li>
           <li>
             <strong>Meals &amp; Sessions</strong> — Day pass: <strong>$450</strong> per person. All meals
             and sessions with <em>no overnight accommodation</em> — ideal for local or commuting guests.
+          </li>
+          <li>
+            <strong>Sponsor (Scholarship)</strong> — <strong>$6,000</strong>: a keynote speaking slot, a
+            Family suite for you, plus full coverage (room + meals) for two Buddy-room scholarship
+            participants. Our team follows up to coordinate the keynote and scholarship recipients.
           </li>
         </ul>
       </>

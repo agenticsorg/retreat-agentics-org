@@ -28,7 +28,7 @@ type InterestForm = z.infer<typeof interestSchema>;
 // ── Full Registration ───────────────────────────────────────────────────────
 const registrationSchema = z
   .object({
-    tier: z.enum(["solo", "buddy", "family", "meals"], { required_error: "Please select a tier" }),
+    tier: z.enum(["solo", "buddy", "family", "meals", "sponsor"], { required_error: "Please select a tier" }),
     name: z.string().min(2, "Please enter your full name"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().optional(),
@@ -54,22 +54,27 @@ const TIER_INFO: Record<string, { label: string; price: string; note: string }> 
   solo: {
     label: "Solo — Private 1-bedroom suite",
     price: "$2,000 USD / person",
-    note: "All meals + activities included. Private 1-bedroom suite — only a few rooms left.",
+    note: "All meals + activities included. Private 1-bedroom suite — only 2 rooms left.",
   },
   buddy: {
     label: "Buddy — Shared 2-bedroom suite (per person)",
     price: "$1,700 USD / person",
-    note: "Both attendees must register. Enter your partner's email below. Only a few rooms left.",
+    note: "Both attendees must register. Enter your partner's email below. Only 10 rooms left.",
   },
   family: {
     label: "Family — Exclusive 2-bedroom suite",
     price: "$2,300 USD first person + $450 / additional person",
-    note: "All meals + activities included. Only a few rooms left.",
+    note: "All meals + activities included. Only 6 rooms left.",
   },
   meals: {
     label: "Meals & Sessions — day pass (no room)",
     price: "$450 USD / person",
     note: "All meals, workshops, hackathon & boat tour. Overnight accommodation not included — ideal for local or commuting guests.",
+  },
+  sponsor: {
+    label: "Sponsor — Scholarship package",
+    price: "$6,000 USD",
+    note: "Sponsor the summit: a keynote speaking slot, a Family suite for you, plus full coverage (room + meals) for two Buddy-room scholarship participants. Our team will follow up to coordinate your keynote and scholarship recipients.",
   },
 };
 
@@ -171,6 +176,7 @@ function FullRegistrationForm() {
             <SelectItem value="buddy">Buddy — $1,700 / person (shared 2-bedroom)</SelectItem>
             <SelectItem value="family">Family — $2,300 + $450/person (exclusive 2-bedroom)</SelectItem>
             <SelectItem value="meals">Meals & Sessions — $450 / person (day pass, no room)</SelectItem>
+            <SelectItem value="sponsor">Sponsor — $6,000 (keynote + family suite + 2 scholarships)</SelectItem>
           </SelectContent>
         </Select>
         {errors.tier && <p className="text-xs text-destructive">{errors.tier.message}</p>}

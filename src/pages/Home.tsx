@@ -321,7 +321,7 @@ export default function Home() {
               price="$2,000"
               priceUnit="USD / person"
               description="Private 1-bedroom suite for a solo attendee."
-              availability="Only a few rooms left — first come, first served"
+              availability="Only 2 rooms left — first come, first served"
               includedItems={INCLUDED_BASE}
             />
             <TierCard
@@ -329,7 +329,7 @@ export default function Home() {
               price="$1,700"
               priceUnit="USD / person"
               description="Two attendees sharing a 2-bedroom suite. Both must register together."
-              availability="Only a few rooms left"
+              availability="Only 10 rooms left"
               highlight
               includedItems={INCLUDED_BASE}
             />
@@ -338,7 +338,7 @@ export default function Home() {
               price="$2,300"
               priceUnit="USD + $450/person"
               description="2-bedroom suite for your group. First person + $450 per additional attendee."
-              availability="Only a few rooms left"
+              availability="Only 6 rooms left"
               includedItems={INCLUDED_BASE}
             />
             <TierCard
@@ -349,6 +349,45 @@ export default function Home() {
               availability="No accommodation included"
               includedItems={INCLUDED_MEALS}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsor / scholarship tier */}
+      <section className="py-16 bg-background">
+        <div className="container max-w-5xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/5 p-8 md:p-10">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+              <Mic className="h-3.5 w-3.5" /> Sponsor a Scholarship
+            </span>
+            <div className="mt-4 flex flex-col lg:flex-row lg:items-center gap-8">
+              <div className="flex-1">
+                <h3 className="text-2xl md:text-3xl font-heading font-bold">Sponsor the summit, fund two scholarships</h3>
+                <p className="text-muted-foreground mt-2 max-w-xl">
+                  Put your name behind the next generation of agentic engineers. The sponsor package
+                  gives you a stage and brings two scholarship participants to Lake Joseph on you.
+                </p>
+                <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
+                  {[
+                    "Keynote speaking slot at the summit",
+                    "A Family suite, all meals for you and your guests",
+                    "Two Buddy-room scholarship participants covered",
+                    "All meals & activities for your scholars",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="lg:text-right shrink-0">
+                <p className="text-4xl font-heading font-bold">$6,000 <span className="text-sm font-normal text-muted-foreground">USD</span></p>
+                <Button asChild className="mt-4">
+                  <Link to="/register">Become a sponsor <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -440,9 +479,9 @@ export default function Home() {
               </p>
               <ul className="space-y-1.5">
                 {[
-                  "Solo: private 1-bedroom suite (only a few left)",
-                  "Buddy: shared 2-bedroom suite (register as a pair)",
-                  "Family: exclusive 2-bedroom suite for your group",
+                  "Solo: private 1-bedroom suite (only 2 left)",
+                  "Buddy: shared 2-bedroom suite, register as a pair (10 left)",
+                  "Family: exclusive 2-bedroom suite for your group (6 left)",
                   "Meals-only day pass: attend without an overnight room",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
