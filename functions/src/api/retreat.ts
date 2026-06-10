@@ -78,6 +78,17 @@ const ADDITIONAL_PERSON_AMOUNT = 45000; // $450 per additional person
 
 type Tier = keyof typeof TIERS;
 
+// Rooms each tier reserves from retreat_config/inventory. Sponsor takes a
+// Family suite (the sponsor) + two Buddy rooms (the scholarship participants).
+// meals takes none. The reservation is atomic and blocks if any field is short.
+const ROOM_DEDUCTIONS: Record<Tier, Record<string, number>> = {
+  solo:    { soloRemaining: 1 },
+  buddy:   { buddyRemaining: 1 },
+  family:  { familyRemaining: 1 },
+  meals:   {},
+  sponsor: { familyRemaining: 1, buddyRemaining: 2 },
+};
+
 // ─── 1. Early Interest (free waitlist) ───
 
 export const retreatInterest = onRequest(
@@ -159,20 +170,26 @@ export const retreatCreateCheckoutSession = onRequest(
     const extraPeople = tierKey === 'family' ? Math.max(0, Math.min(10, parseInt(additionalPersons) || 0)) : 0;
     const totalAmountUsd = tierInfo.unitAmount / 100 + extraPeople * (ADDITIONAL_PERSON_AMOUNT / 100);
 
-    // Check inventory (the meals day-pass has no room cap → skip)
+    // Reserve rooms atomically. meals takes none; sponsor takes 1 family + 2 buddy.
+    // Blocks (409) if ANY required room is short, so we never oversell.
     const configRef = db.collection('retreat_config').doc('inventory');
-    const inventoryField = tierKey === 'solo' ? 'soloRemaining'
-      : tierKey === 'buddy' ? 'buddyRemaining'
-      : tierKey === 'family' ? 'familyRemaining' : null;
+    const deductions = ROOM_DEDUCTIONS[tierKey];
+    const needsRooms = Object.keys(deductions).length > 0;
 
-    if (inventoryField !== null) {
-      let hasSlot = false;
+    if (needsRooms) {
+      let reserved = false;
       try {
-        hasSlot = await db.runTransaction(async (tx) => {
+        reserved = await db.runTransaction(async (tx) => {
           const snap = await tx.get(configRef);
-          const remaining = snap.exists ? ((snap.data() as any)[inventoryField] ?? 0) : 0;
-          if (remaining <= 0) return false;
-          tx.update(configRef, { [inventoryField]: remaining - 1 });
+          const data = (snap.exists ? snap.data() : {}) as Record<string, number>;
+          for (const [field, qty] of Object.entries(deductions)) {
+            if ((data[field] ?? 0) < qty) return false;
+          }
+          const update: Record<string, number> = {};
+          for (const [field, qty] of Object.entries(deductions)) {
+            update[field] = (data[field] ?? 0) - qty;
+          }
+          tx.update(configRef, update);
           return true;
         });
       } catch (e) {
@@ -180,7 +197,7 @@ export const retreatCreateCheckoutSession = onRequest(
         res.status(500).json({ error: 'inventory check failed' }); return;
       }
 
-      if (!hasSlot) {
+      if (!reserved) {
         res.status(409).json({ error: `No ${tierKey} spots remaining` }); return;
       }
     }
@@ -201,6 +218,10 @@ export const retreatCreateCheckoutSession = onRequest(
     try {
       const session = await getStripe().checkout.sessions.create({
         mode: 'payment',
+        // Expire in 1h so an abandoned checkout releases its reserved rooms
+        // promptly (via the checkout.session.expired webhook) instead of holding
+        // them for Stripe's 24h default.
+        expires_at: Math.floor(Date.now() / 1000) + 60 * 60,
         customer_email: email.toLowerCase(),
         line_items: lineItems,
         allow_promotion_codes: true,
@@ -234,18 +255,51 @@ export const retreatCreateCheckoutSession = onRequest(
 
       res.json({ url: session.url });
     } catch (e: any) {
-      // Refund the inventory slot on Stripe failure (skip for meals — no slot taken)
-      if (inventoryField !== null) {
+      // Release reserved rooms on Stripe failure (skip for meals — none taken)
+      if (needsRooms) {
         try {
           await db.runTransaction(async (tx) => {
             const snap = await tx.get(configRef);
-            const current = snap.exists ? ((snap.data() as any)[inventoryField] ?? 0) : 0;
-            tx.update(configRef, { [inventoryField]: current + 1 });
+            const data = (snap.exists ? snap.data() : {}) as Record<string, number>;
+            const update: Record<string, number> = {};
+            for (const [field, qty] of Object.entries(deductions)) {
+              update[field] = (data[field] ?? 0) + qty;
+            }
+            tx.update(configRef, update);
           });
         } catch { /* best-effort */ }
       }
       console.error('retreatCreateCheckoutSession Stripe error:', e);
       res.status(500).json({ error: 'checkout session creation failed' });
+    }
+  }
+);
+
+// ─── 2b. Public inventory (drives "SOLD OUT" UI) ───
+
+export const retreatInventory = onRequest(
+  { region: 'us-central1', memory: '256MiB', timeoutSeconds: 30 },
+  async (req, res) => {
+    if (handleRetreatCors(req, res)) return;
+    if (req.method !== 'GET') { res.status(405).json({ error: 'GET only' }); return; }
+
+    try {
+      const snap = await db.collection('retreat_config').doc('inventory').get();
+      const d = (snap.exists ? snap.data() : {}) as Record<string, number>;
+      const solo = d.soloRemaining ?? 0;
+      const buddy = d.buddyRemaining ?? 0;
+      const family = d.familyRemaining ?? 0;
+      res.set('Cache-Control', 'no-store');
+      res.json({
+        soloRemaining: solo,
+        buddyRemaining: buddy,
+        familyRemaining: family,
+        // A sponsor needs 1 family suite + 2 buddy rooms; sold out if either is short.
+        sponsorAvailable: family >= 1 && buddy >= 2,
+      });
+    } catch (e) {
+      console.error('retreatInventory error:', e);
+      res.status(500).json({ error: 'failed to read inventory' });
     }
   }
 );
@@ -270,6 +324,40 @@ export const retreatWebhook = onRequest(
     } catch (e: any) {
       console.error('retreatWebhook signature error:', e.message);
       res.status(400).send(`Webhook Error: ${e.message}`);
+      return;
+    }
+
+    // Abandoned/expired checkout → release the rooms we reserved at creation.
+    // Idempotent: only acts while the registration is still 'pending'.
+    if (event.type === 'checkout.session.expired') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const tierKey = session.metadata?.tier as Tier | undefined;
+      const deductions = tierKey ? ROOM_DEDUCTIONS[tierKey] : undefined;
+      const regRef = db.collection('retreat_registrations').doc(session.id);
+      const configRef = db.collection('retreat_config').doc('inventory');
+      try {
+        await db.runTransaction(async (tx) => {
+          const regSnap = await tx.get(regRef);
+          if (!regSnap.exists || (regSnap.data() as any).status !== 'pending') return; // already handled/paid
+          if (deductions && Object.keys(deductions).length > 0) {
+            const invSnap = await tx.get(configRef);
+            const data = (invSnap.exists ? invSnap.data() : {}) as Record<string, number>;
+            const update: Record<string, number> = {};
+            for (const [field, qty] of Object.entries(deductions)) {
+              update[field] = (data[field] ?? 0) + qty;
+            }
+            tx.update(configRef, update);
+          }
+          tx.update(regRef, {
+            status: 'expired',
+            expiredAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        });
+      } catch (e) {
+        console.error('retreatWebhook expired-release error:', e);
+        res.status(500).send('release error'); return;
+      }
+      res.json({ received: true });
       return;
     }
 

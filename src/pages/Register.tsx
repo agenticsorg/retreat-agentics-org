@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/components/ui/select";
-import { submitInterest, createRegistrationSession } from "@/lib/api";
+import { submitInterest, createRegistrationSession, getInventory } from "@/lib/api";
 
 // ── Early Interest ──────────────────────────────────────────────────────────
 const interestSchema = z.object({
@@ -129,6 +129,13 @@ function EarlyInterestForm() {
 
 function FullRegistrationForm() {
   const [tier, setTier] = useState<string>("");
+  const [sponsorAvailable, setSponsorAvailable] = useState(true);
+
+  useEffect(() => {
+    getInventory()
+      .then((inv) => setSponsorAvailable(inv.sponsorAvailable))
+      .catch(() => {/* keep optimistic default; backend still guards */});
+  }, []);
   const {
     register,
     handleSubmit,
@@ -176,7 +183,9 @@ function FullRegistrationForm() {
             <SelectItem value="buddy">Buddy — $1,700 / person (shared 2-bedroom)</SelectItem>
             <SelectItem value="family">Family — $2,300 + $450/person (exclusive 2-bedroom)</SelectItem>
             <SelectItem value="meals">Meals & Sessions — $450 / person (day pass, no room)</SelectItem>
-            <SelectItem value="sponsor">Sponsor — $6,000 (keynote + family suite + 2 scholarships)</SelectItem>
+            {sponsorAvailable && (
+              <SelectItem value="sponsor">Sponsor — $6,000 (keynote + family suite + 2 scholarships)</SelectItem>
+            )}
           </SelectContent>
         </Select>
         {errors.tier && <p className="text-xs text-destructive">{errors.tier.message}</p>}

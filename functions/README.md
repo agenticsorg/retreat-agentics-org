@@ -13,8 +13,27 @@ power retreat checkout, deployed in GCP project **`agenticsorg`**:
 |----------|---------|
 | `retreatInterest` | Free email waitlist |
 | `retreatCreateCheckoutSession` | Stripe Checkout (paid tiers) |
-| `retreatWebhook` | Stripe webhook → marks registration paid |
+| `retreatInventory` | Public GET — remaining room counts + `sponsorAvailable` (drives "SOLD OUT" UI) |
+| `retreatWebhook` | Stripe webhook → marks registration paid; releases rooms on expiry |
 | `retreatContact` | Contact form → support@agentics.org |
+
+Each export is a separate gen2 function; they're registered in `src/index.ts`
+(`export { …, retreatInventory } from './api/retreat'`). Adding a new endpoint =
+a new `gcloud functions deploy <name>` (a new Cloud Run service).
+
+## Inventory model
+
+Room counts live in Firestore `retreat_config/inventory`
+(`soloRemaining`/`buddyRemaining`/`familyRemaining` — *not* the legacy
+`singleRemaining`/`suiteRemaining`). `ROOM_DEDUCTIONS` maps each tier to the rooms
+it consumes: solo/buddy/family = 1 of their own; **sponsor = 1 family + 2 buddy**;
+meals = none. Checkout **reserves atomically** and returns 409 if any room is short.
+
+To avoid leaking rooms on abandoned carts: sessions are created with a **1-hour
+`expires_at`**, and the webhook handles **`checkout.session.expired`** to release
+the reserved rooms (idempotent — only while the registration is still `pending`).
+The Stripe webhook endpoint must be subscribed to both
+`checkout.session.completed` and `checkout.session.expired`.
 
 There is no separate source repo for these functions; the source of truth is the
 deployed package in GCS. This copy exists so the changes are version-controlled.
