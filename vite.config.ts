@@ -6,6 +6,15 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    // Dev-only: proxy Cloud Function calls so the browser request stays
+    // same-origin (avoids CORS from the Codespace preview domain). Set
+    // VITE_FUNCTIONS_URL="" in .env.local to route calls through this.
+    proxy: {
+      "/retreat": {
+        target: "https://us-central1-agenticsorg.cloudfunctions.net",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
   resolve: {

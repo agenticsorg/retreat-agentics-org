@@ -47,15 +47,15 @@ const highlights = [
 
 interface TierCardProps {
   name: string;
-  earlyBirdPrice: string;
-  regularPrice: string;
+  price: string;
+  priceUnit?: string;
   description: string;
   availability: string;
   highlight?: boolean;
   includedItems: string[];
 }
 
-function TierCard({ name, earlyBirdPrice, regularPrice, description, availability, highlight, includedItems }: TierCardProps) {
+function TierCard({ name, price, priceUnit, description, availability, highlight, includedItems }: TierCardProps) {
   return (
     <div
       className={`relative flex flex-col rounded-xl border p-6 gap-4 ${
@@ -74,11 +74,10 @@ function TierCard({ name, earlyBirdPrice, regularPrice, description, availabilit
         <p className="text-muted-foreground text-sm mt-1">{description}</p>
       </div>
       <div>
-        <div className="flex items-baseline gap-2">
-          <p className="text-4xl font-heading font-bold">{earlyBirdPrice}</p>
-          <span className="text-xs font-semibold text-primary bg-primary/10 rounded px-2 py-0.5">Early bird</span>
+        <div className="flex items-baseline gap-1.5">
+          <p className="text-4xl font-heading font-bold">{price}</p>
+          {priceUnit && <span className="text-sm text-muted-foreground">{priceUnit}</span>}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">Rises to {regularPrice} on June 1, 2026</p>
       </div>
       <ul className="space-y-2 text-sm flex-1">
         {includedItems.map((item) => (
@@ -105,6 +104,17 @@ const INCLUDED_BASE = [
   "Private Lake Joseph boat tour",
   "Resort activities (canoes, kayaks…)",
   "Summit swag",
+];
+
+const INCLUDED_MEALS = [
+  "Friday welcome reception",
+  "Sat & Sun full meals (3/day)",
+  "Refreshment breaks daily",
+  "AI workshops & hackathon",
+  "Private Lake Joseph boat tour",
+  "Resort day activities (canoes, kayaks…)",
+  "Summit swag",
+  "No overnight accommodation",
 ];
 
 export default function Home() {
@@ -168,12 +178,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Early bird urgency banner */}
+      {/* Availability urgency banner */}
       <section className="bg-primary text-primary-foreground py-3">
         <div className="container flex items-center justify-center gap-3 text-sm font-medium flex-wrap text-center">
           <Clock className="h-4 w-4 shrink-0" />
           <span>
-            <strong>Early bird pricing ends May 31, 2026</strong> — Save $500 on all tiers. Only 10 solo suites available.
+            <strong>Only a few rooms left</strong> — secure your lakeside suite before they're gone.
           </span>
           <Link to="/register" className="underline underline-offset-2 whitespace-nowrap hover:no-underline">
             Register now →
@@ -299,37 +309,85 @@ export default function Home() {
               Choose your Muskoka experience
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              All-inclusive: accommodations, meals, workshops, hackathon, boat tour, and resort
-              activities. Early bird pricing ends May 31, 2026.
+              Suite tiers are all-inclusive: accommodations, meals, workshops, hackathon, boat tour,
+              and resort activities. Prefer to commute? Grab the meals-only day pass. Only a few
+              rooms left.
             </p>
             <p className="text-xs text-muted-foreground mt-2">Golf fees and alcohol not included.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <TierCard
               name="Solo"
-              earlyBirdPrice="$1,500 USD"
-              regularPrice="$2,000"
+              price="$2,000"
+              priceUnit="USD / person"
               description="Private 1-bedroom suite for a solo attendee."
-              availability="Only 10 suites available — first come, first served"
+              availability="Only 2 rooms left — first come, first served"
               includedItems={INCLUDED_BASE}
             />
             <TierCard
               name="Buddy"
-              earlyBirdPrice="$1,200 USD"
-              regularPrice="$1,700"
+              price="$1,700"
+              priceUnit="USD / person"
               description="Two attendees sharing a 2-bedroom suite. Both must register together."
-              availability="Limited buddy pairs available"
+              availability="Only 10 rooms left"
               highlight
               includedItems={INCLUDED_BASE}
             />
             <TierCard
               name="Family"
-              earlyBirdPrice="$1,800 USD"
-              regularPrice="$2,300"
+              price="$2,300"
+              priceUnit="USD + $450/person"
               description="2-bedroom suite for your group. First person + $450 per additional attendee."
-              availability="Limited family suites available"
+              availability="Only 6 rooms left"
               includedItems={INCLUDED_BASE}
             />
+            <TierCard
+              name="Meals & Sessions"
+              price="$450"
+              priceUnit="USD / person"
+              description="Day pass for local or commuting guests — all meals and sessions, no overnight room."
+              availability="No accommodation included"
+              includedItems={INCLUDED_MEALS}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsor / scholarship tier */}
+      <section className="py-16 bg-background">
+        <div className="container max-w-5xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/5 p-8 md:p-10">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+              <Mic className="h-3.5 w-3.5" /> Sponsor a Scholarship
+            </span>
+            <div className="mt-4 flex flex-col lg:flex-row lg:items-center gap-8">
+              <div className="flex-1">
+                <h3 className="text-2xl md:text-3xl font-heading font-bold">Sponsor the summit, fund two scholarships</h3>
+                <p className="text-muted-foreground mt-2 max-w-xl">
+                  Put your name behind the next generation of agentic engineers. The sponsor package
+                  gives you a stage and brings two scholarship participants to Lake Joseph on you.
+                </p>
+                <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
+                  {[
+                    "Keynote speaking slot at the summit",
+                    "A Family suite, all meals for you and your guests",
+                    "Two Buddy-room scholarship participants covered",
+                    "All meals & activities for your scholars",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="lg:text-right shrink-0">
+                <p className="text-4xl font-heading font-bold">$6,000 <span className="text-sm font-normal text-muted-foreground">USD</span></p>
+                <Button asChild className="mt-4">
+                  <Link to="/register">Become a sponsor <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -421,9 +479,10 @@ export default function Home() {
               </p>
               <ul className="space-y-1.5">
                 {[
-                  "Solo: private 1-bedroom suite (only 10 available)",
-                  "Buddy: shared 2-bedroom suite (register as a pair)",
-                  "Family: exclusive 2-bedroom suite for your group",
+                  "Solo: private 1-bedroom suite (only 2 left)",
+                  "Buddy: shared 2-bedroom suite, register as a pair (10 left)",
+                  "Family: exclusive 2-bedroom suite for your group (6 left)",
+                  "Meals-only day pass: attend without an overnight room",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
