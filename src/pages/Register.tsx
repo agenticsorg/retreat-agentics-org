@@ -54,7 +54,7 @@ const TIER_INFO: Record<string, { label: string; price: string; note: string }> 
   solo: {
     label: "Solo — Private 1-bedroom suite",
     price: "$2,000 USD / person",
-    note: "All meals + activities included. Private 1-bedroom suite — only 2 rooms left.",
+    note: "Sold out — the private 1-bedroom suites are fully booked. Please choose another tier.",
   },
   buddy: {
     label: "Buddy — Shared 2-bedroom suite (per person)",
@@ -179,7 +179,7 @@ function FullRegistrationForm() {
             <SelectValue placeholder="Select a tier…" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
-            <SelectItem value="solo">Solo — $2,000 / person (private 1-bedroom)</SelectItem>
+            <SelectItem value="solo" disabled>Solo — Sold out (private 1-bedroom)</SelectItem>
             <SelectItem value="buddy">Buddy — $1,700 / person (shared 2-bedroom)</SelectItem>
             <SelectItem value="family">Family — $2,300 + $450/person (exclusive 2-bedroom)</SelectItem>
             <SelectItem value="meals">Meals & Sessions — $450 / person (day pass, no room)</SelectItem>

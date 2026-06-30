@@ -52,34 +52,42 @@ interface TierCardProps {
   description: string;
   availability: string;
   highlight?: boolean;
+  soldOut?: boolean;
   includedItems: string[];
 }
 
-function TierCard({ name, price, priceUnit, description, availability, highlight, includedItems }: TierCardProps) {
+function TierCard({ name, price, priceUnit, description, availability, highlight, soldOut, includedItems }: TierCardProps) {
   return (
     <div
-      className={`relative flex flex-col rounded-xl border p-6 gap-4 ${
-        highlight
-          ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-          : "border-border bg-card"
+      className={`relative flex flex-col overflow-hidden rounded-xl border p-6 gap-4 ${
+        soldOut
+          ? "border-border bg-muted/40"
+          : highlight
+            ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+            : "border-border bg-card"
       }`}
     >
-      {highlight && (
+      {soldOut && (
+        <span className="pointer-events-none absolute right-[-52px] top-[26px] z-10 w-[180px] rotate-45 bg-destructive py-1 text-center text-xs font-bold uppercase tracking-wider text-destructive-foreground shadow-md">
+          Sold Out
+        </span>
+      )}
+      {highlight && !soldOut && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
           Most popular
         </span>
       )}
-      <div>
+      <div className={soldOut ? "opacity-60" : undefined}>
         <h3 className="text-2xl font-heading font-bold">{name}</h3>
         <p className="text-muted-foreground text-sm mt-1">{description}</p>
       </div>
-      <div>
+      <div className={soldOut ? "opacity-60" : undefined}>
         <div className="flex items-baseline gap-1.5">
-          <p className="text-4xl font-heading font-bold">{price}</p>
+          <p className={`text-4xl font-heading font-bold ${soldOut ? "line-through text-muted-foreground" : ""}`}>{price}</p>
           {priceUnit && <span className="text-sm text-muted-foreground">{priceUnit}</span>}
         </div>
       </div>
-      <ul className="space-y-2 text-sm flex-1">
+      <ul className={`space-y-2 text-sm flex-1 ${soldOut ? "opacity-60" : ""}`}>
         {includedItems.map((item) => (
           <li key={item} className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-primary shrink-0" />
@@ -87,10 +95,16 @@ function TierCard({ name, price, priceUnit, description, availability, highlight
           </li>
         ))}
       </ul>
-      <p className="text-xs text-muted-foreground">{availability}</p>
-      <Button asChild className="mt-2" variant={highlight ? "default" : "outline"}>
-        <Link to="/register">Register now <ArrowRight className="h-4 w-4" /></Link>
-      </Button>
+      <p className={`text-xs ${soldOut ? "font-semibold text-destructive" : "text-muted-foreground"}`}>{availability}</p>
+      {soldOut ? (
+        <span className="mt-2 inline-flex h-10 items-center justify-center rounded-md bg-destructive/15 px-4 text-sm font-bold uppercase tracking-wide text-destructive">
+          Sold Out
+        </span>
+      ) : (
+        <Button asChild className="mt-2" variant={highlight ? "default" : "outline"}>
+          <Link to="/register">Register now <ArrowRight className="h-4 w-4" /></Link>
+        </Button>
+      )}
     </div>
   );
 }
@@ -330,7 +344,8 @@ export default function Home() {
               price="$2,000"
               priceUnit="USD / person"
               description="Private 1-bedroom suite for a solo attendee."
-              availability="Only 2 rooms left — first come, first served"
+              availability="0 rooms left — sold out"
+              soldOut
               includedItems={INCLUDED_BASE}
             />
             <TierCard
@@ -508,7 +523,7 @@ export default function Home() {
               </p>
               <ul className="space-y-1.5">
                 {[
-                  "Solo: private 1-bedroom suite (only 2 left)",
+                  "Solo: private 1-bedroom suite (sold out)",
                   "Buddy: shared 2-bedroom suite, register as a pair (10 left)",
                   "Family: exclusive 2-bedroom suite for your group (6 left)",
                   "Meals-only day pass: attend without an overnight room",
