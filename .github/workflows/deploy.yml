@@ -1,0 +1,48 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT: agentics-487016
+  GCP_REGION: us-central1
+  SERVICE: retreat-agentics-org
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/667037737667/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-cicd@agentics-487016.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --source . \
+            --region "$GCP_REGION" \
+            --project "$GCP_PROJECT" \
+            --allow-unauthenticated \
+            --quiet
+
+      - name: Verify deployed revision serves the new build
+        run: |
+          sleep 5
+          curl -sS "https://retreat.agentics.org/" \
+            | grep -oE 'assets/index-[a-zA-Z0-9_-]+\.(js|css)' | sort -u
