@@ -26,27 +26,17 @@ const interestSchema = z.object({
 type InterestForm = z.infer<typeof interestSchema>;
 
 // ── Full Registration ───────────────────────────────────────────────────────
-const registrationSchema = z
-  .object({
-    tier: z.enum(["solo", "buddy", "family", "meals", "sponsor"], { required_error: "Please select a tier" }),
-    name: z.string().min(2, "Please enter your full name"),
-    email: z.string().email("Please enter a valid email address"),
-    phone: z.string().optional(),
-    partner: z.string().optional(),
-    additionalPersons: z.coerce.number().min(0).max(10).optional(),
-    dietaryReqs: z.string().optional(),
-    emergencyName: z.string().min(2, "Please enter an emergency contact name"),
-    emergencyPhone: z.string().min(7, "Please enter an emergency contact phone number"),
-  })
-  .superRefine((data, ctx) => {
-    if (data.tier === "buddy" && !data.partner) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Partner email is required for the Buddy tier",
-        path: ["partner"],
-      });
-    }
-  });
+const registrationSchema = z.object({
+  tier: z.enum(["solo", "buddy", "family", "meals", "sponsor"], { required_error: "Please select a tier" }),
+  name: z.string().min(2, "Please enter your full name"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().optional(),
+  partner: z.string().optional(),
+  additionalPersons: z.coerce.number().min(0).max(10).optional(),
+  dietaryReqs: z.string().optional(),
+  emergencyName: z.string().min(2, "Please enter an emergency contact name"),
+  emergencyPhone: z.string().min(7, "Please enter an emergency contact phone number"),
+});
 
 type RegistrationForm = z.infer<typeof registrationSchema>;
 
@@ -59,7 +49,7 @@ const TIER_INFO: Record<string, { label: string; price: string; note: string }> 
   buddy: {
     label: "Buddy — Shared 2-bedroom suite (per person)",
     price: "$1,700 USD / person",
-    note: "Both attendees must register. Enter your partner's email below. Only 10 rooms left.",
+    note: "Reserve one room of a two-room suite. We'll ask for any roommate preferences ahead of the event. Only 10 rooms left.",
   },
   family: {
     label: "Family — Exclusive 2-bedroom suite",
@@ -221,19 +211,20 @@ function FullRegistrationForm() {
         <Input id="reg-phone" type="tel" placeholder="+1 416 555 0100" {...register("phone")} />
       </div>
 
-      {/* Partner — Buddy tier only */}
+      {/* Buddy preferences — Buddy tier only */}
       {tier === "buddy" && (
         <div className="space-y-1 rounded-lg border border-primary/20 bg-primary/5 p-4">
           <Label htmlFor="reg-partner">
-            Partner email address <span className="text-destructive">*</span>
+            Buddy preferences <span className="text-xs font-normal text-muted-foreground">(optional)</span>
           </Label>
           <p className="text-xs text-muted-foreground mb-2">
-            Both attendees must register. Enter your partner's email so we can link your booking.
+            Have a roommate in mind? Let us know here. Otherwise leave it blank and we'll follow up
+            before the event to match you with a roommate.
           </p>
           <Input
             id="reg-partner"
-            type="email"
-            placeholder="partner@example.com"
+            type="text"
+            placeholder="e.g. rooming with Jane, or leave blank"
             {...register("partner")}
           />
           {errors.partner && (

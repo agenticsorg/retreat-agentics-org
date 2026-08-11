@@ -352,7 +352,7 @@ export default function Home() {
               name="Buddy"
               price="$1,700"
               priceUnit="USD / person"
-              description="Two attendees sharing a 2-bedroom suite. Both must register together."
+              description="Reserve one room of a two-room suite. We'll ask for any roommate preferences ahead of the event. All-inclusive."
               availability="Only 10 rooms left"
               highlight
               includedItems={INCLUDED_BASE}
