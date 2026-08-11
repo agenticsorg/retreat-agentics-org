@@ -136,7 +136,7 @@ const faqs: FaqItem[] = [
   {
     question: "Can I attend at the Buddy rate without a partner?",
     answer:
-      "No — the Buddy rate requires two attendees to register together and share a 2-bedroom suite. Both must complete registration and provide each other's email. Solo attendees should select the Solo tier.",
+      "Yes — the Buddy rate reserves one room in a shared 2-bedroom suite, and you register on your own. If you have someone specific in mind to room with, let us know in the optional preferences field during registration. Otherwise we'll follow up before the event to match you with a roommate.",
   },
   {
     question: "Is there a cancellation policy?",
